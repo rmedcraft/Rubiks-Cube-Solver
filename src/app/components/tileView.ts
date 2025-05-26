@@ -1,8 +1,8 @@
 import * as THREE from 'three';
+import { Side } from './CubeView';
 
 export class TileView {
-    color: THREE.Color = new THREE.Color(Color.blue);
-    mesh: THREE.Mesh = new THREE.Mesh(new THREE.PlaneGeometry(), new THREE.MeshBasicMaterial({ color: this.color }));
+    mesh: THREE.Mesh = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9), new THREE.MeshBasicMaterial({ color: Color.white }));
 
     setColor(color: Color) {
         (this.mesh.material as THREE.MeshBasicMaterial).color.setHex(color);
@@ -10,6 +10,24 @@ export class TileView {
 
     getColor() {
         return (this.mesh.material as THREE.MeshBasicMaterial).color.getHex() as Color;
+    }
+
+    rotateBySide(side: Side) {
+        if (side === Side.back) {
+            this.mesh.rotateX(Math.PI);
+        }
+        if (side === Side.left) {
+            this.mesh.rotateY(-Math.PI / 2);
+        }
+        if (side === Side.right) {
+            this.mesh.rotateY(Math.PI / 2);
+        }
+        if (side === Side.top) {
+            this.mesh.rotateX(-Math.PI / 2);
+        }
+        if (side === Side.bottom) {
+            this.mesh.rotateX(Math.PI / 2);
+        }
     }
 }
 

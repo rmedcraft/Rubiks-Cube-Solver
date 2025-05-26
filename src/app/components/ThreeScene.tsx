@@ -1,8 +1,10 @@
 import * as THREE from "three";
 import React, { useRef, useEffect } from "react";
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { Color, TileView } from "./tileView";
+import { Color, TileView } from "./TileView";
 import { color } from "three/tsl";
+import { CubeView, Side } from "./CubeView";
+// import { TileView } from "./tileView";
 
 const ThreeScene: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -23,33 +25,25 @@ const ThreeScene: React.FC = () => {
             // const cube = new THREE.Mesh(pane, material);
             // scene.add(cube);
             const tileView = new TileView();
-            scene.add(tileView.mesh);
+            tileView.setColor(Color.white);
+            // tileView.rotateBySide(Side.back);
+            // scene.add(tileView.mesh);
 
-            console.log(tileView.mesh);
+            const cubeView = new CubeView(3);
+            cubeView.printCube();
+            scene.add(cubeView.getCube());
+
+            // console.log(tileView.mesh);
 
 
             const controls = new OrbitControls(camera, renderer.domElement);
             controls.update();
-            let index = 0;
-            let i = 0;
 
-            let colors = [Color.white, Color.red, Color.orange, Color.blue, Color.green, Color.yellow];
-            tileView.setColor(colors[index++]);
-            // handle animations
+            // sets the controls to orbit the center of the cube by default
+            controls.target = cubeView.getCenterPoint();
+
             function animate() {
                 controls.update();
-                // tileView.mesh.rotation.x += 0.01;
-                // tileView.mesh.rotation.y += 0.01;
-
-                i++;
-                if (i >= 100) {
-                    i = 0;
-                    tileView.setColor(colors[index++]);
-                    if (index >= colors.length) {
-                        index = 0;
-                    }
-                }
-
 
                 renderer.render(scene, camera);
                 requestAnimationFrame(animate);
