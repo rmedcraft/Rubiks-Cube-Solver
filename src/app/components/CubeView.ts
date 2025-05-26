@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { Color, TileView } from './TileView';
-import { dirxml } from 'console';
 
 
 export class CubeView {

@@ -2,7 +2,6 @@ import * as THREE from "three";
 import React, { useRef, useEffect } from "react";
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Color, TileView } from "./TileView";
-import { color } from "three/tsl";
 import { CubeView, Side } from "./CubeView";
 // import { TileView } from "./tileView";
 
