@@ -40,6 +40,7 @@ const ThreeScene: React.FC = () => {
 
             // sets the controls to orbit the center of the cube by default
             controls.target = cubeView.getCenterPoint();
+            controls.autoRotate = true;
 
             function animate() {
                 controls.update();
