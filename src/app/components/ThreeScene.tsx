@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Color, TileView } from "./TileView";
 import { CubeView, Side } from "./CubeView";
@@ -8,8 +8,17 @@ import { CubeView, Side } from "./CubeView";
 const ThreeScene: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
 
+    const [debugMode, setDebugMode] = useState(false);
+
+    // window!.addEventListener('keydown', (event) => {
+    //     if (event.ctrlKey) {
+    //         setDebugMode(debugMode => !debugMode);
+    //         console.log("ctrl pressed, debug mode: " + debugMode);
+    //     }
+    // });
     useEffect(() => {
         if (typeof window !== "undefined") {
+
             // initialize three.js scene here
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -18,17 +27,7 @@ const ThreeScene: React.FC = () => {
             containerRef.current?.appendChild(renderer.domElement);
             camera.position.z = 5;
 
-            // const geometry = new THREE.BoxGeometry();
-            // const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-            // const pane = new THREE.PlaneGeometry();
-            // const cube = new THREE.Mesh(pane, material);
-            // scene.add(cube);
-            const tileView = new TileView();
-            tileView.setColor(Color.white);
-            // tileView.rotateBySide(Side.back);
-            // scene.add(tileView.mesh);
-
-            const cubeView = new CubeView(3);
+            const cubeView = new CubeView(3, debugMode);
             cubeView.printCube();
             scene.add(cubeView.getCube());
 
@@ -40,7 +39,7 @@ const ThreeScene: React.FC = () => {
 
             // sets the controls to orbit the center of the cube by default
             controls.target = cubeView.getCenterPoint();
-            controls.autoRotate = true;
+            // controls.autoRotate = true;
 
             function animate() {
                 controls.update();

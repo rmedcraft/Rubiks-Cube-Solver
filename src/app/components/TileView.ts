@@ -3,9 +3,15 @@ import { Side } from './CubeView';
 
 export class TileView {
     mesh: THREE.Mesh = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9), new THREE.MeshBasicMaterial({ color: Color.white }));
+    color: Color = Color.white;
+
+    constructor(color: Color) {
+        this.setColor(color);
+    }
 
     setColor(color: Color) {
         (this.mesh.material as THREE.MeshBasicMaterial).color.setHex(color);
+        this.color = color;
     }
 
     getColor() {
