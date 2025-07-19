@@ -1,7 +1,30 @@
 import * as THREE from 'three';
 import { Color, TileView } from './TileView';
-import { rotateMatrixClockwise } from '../utils/matrixUtils';
+import { rotateMatrix180, rotateMatrixClockwise, rotateMatrixCounterClockwise } from '../utils/matrixUtils';
 
+// determines whether the rotation is clockwise, counterclockwise, or double
+export enum Direction {
+    regular,
+    prime,
+    double
+}
+
+// indexes in cubeData for each side of the cube, treating white as the bottom and blue as the front
+export enum Side {
+    bottom = 0,
+    front = 1,
+    left = 2,
+    back = 3,
+    right = 4,
+    top = 5
+}
+
+// A rotation will have both a side and a direction
+export type Rotation = {
+    direction: Direction,
+    side: Side
+    amountRotated: number
+}
 
 export class CubeView {
     private dim: number;
@@ -9,6 +32,14 @@ export class CubeView {
     private cubeData: TileView[][][] = [];
     private cube: THREE.Group = new THREE.Group();
     colors = [Color.white, Color.blue, Color.orange, Color.green, Color.red, Color.yellow];
+
+    // used internally for keeping track of the current rotation and when the cube is being rotated
+    private rotating: boolean = true
+    private currentRotation: Rotation = {
+        direction: Direction.double,
+        side: Side.front,
+        amountRotated: 0
+    }
 
     constructor(dim: number) {
         this.dim = Math.round(dim);
@@ -82,6 +113,9 @@ export class CubeView {
             this.cubeData.push(temp2d);
         }
 
+        // temporary for testing
+        // this.cubeData[Side.front][2][0].setColor(Color.white)
+
         // offset all children to be centered at (0, 0, 0) which allows for easier rotation
         const center = this.getCenterPoint()
         this.cube.children.forEach((child) => {
@@ -89,23 +123,83 @@ export class CubeView {
         })
     }
 
+    update(delta: number) {
+        // this.rotating = true // temporary for testing
+
+        // if (!this.rotating) {
+        //     this.currentRotation = {
+        //         direction: Direction.regular,
+        //         side: Side.front,
+        //         amountRotated: 0
+        //     }
+        //     this.rotating = true
+        // }
+
+        if (this.rotating) {
+            this.f(delta)
+        }
+    }
+
     getCube() {
         return this.cube;
     }
 
-    u() {
-        // data
-        rotateMatrixClockwise(this.cubeData[Side.front])
-        // update the top, left, bottom, and right bordering the front
-
-
+    f(delta: number) {
+        const { direction } = this.currentRotation
         // visualization
         const group = new THREE.Group()
         this.cubeData[Side.front].flat().forEach(element => {
+            // this.cube.remove(element.mesh)
             group.add(element.mesh)
         });
 
-        group.rotateZ(Math.PI / 2)
+        for (let i = 0; i < this.dim; i++) {
+            group.add(this.cubeData[Side.top][i][this.dim - 1].mesh)
+            group.add(this.cubeData[Side.bottom][i][this.dim - 1].mesh)
+            group.add(this.cubeData[Side.left][this.dim - 1][i].mesh)
+            group.add(this.cubeData[Side.right][this.dim - 1][i].mesh)
+        }
+
+        let maxAngle = Math.PI / 2
+        if (direction === Direction.double) {
+            maxAngle = Math.PI
+
+            // make rotation go twice as fast if doing a double turn
+            delta *= 2
+        }
+
+        if (this.currentRotation.amountRotated + delta >= maxAngle) {
+            // stop rotating and snap to wherever the turn is supposed to bring you
+            this.rotating = false
+            delta = maxAngle - this.currentRotation.amountRotated
+        }
+        this.currentRotation.amountRotated += delta
+
+        group.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), direction === Direction.prime ? delta : -delta)
+        group.updateMatrixWorld(true)
+
+
+        while (group.children.length > 0) {
+            const element = group.children[0]
+            // update the world matrix based on the transformations made within the group
+            element.updateMatrixWorld(true)
+            element.matrix.copy(element.matrixWorld)
+            element.matrix.decompose(element.position, element.quaternion, element.scale)
+            element.matrixAutoUpdate = true
+
+            // group.remove(element)
+            this.cube.add(element)
+        }
+
+        // data
+        if (direction === Direction.regular) {
+            rotateMatrixClockwise(this.cubeData[Side.front])
+        } else if (direction === Direction.prime) {
+            rotateMatrixCounterClockwise(this.cubeData[Side.front])
+        } else if (direction === Direction.double) {
+            rotateMatrix180(this.cubeData[Side.front])
+        }
+        // update the top, left, bottom, and right bordering the front
     }
 
     /**
@@ -149,13 +243,3 @@ export class CubeView {
     }
 }
 
-// indexes in cubeData for each side of the cube, treating white as the bottom and blue as the front
-// const colors = [Color.white, Color.blue, Color.orange, Color.green, Color.red, Color.yellow];
-export enum Side {
-    bottom = 0,
-    front = 1,
-    left = 2,
-    back = 3,
-    right = 4,
-    top = 5
-}
