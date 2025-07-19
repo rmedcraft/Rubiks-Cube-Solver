@@ -36,10 +36,11 @@ export class CubeView {
     // used internally for keeping track of the current rotation and when the cube is being rotated
     private rotating: boolean = true
     private currentRotation: Rotation = {
-        direction: Direction.double,
+        direction: Direction.regular,
         side: Side.front,
         amountRotated: 0
     }
+    private i = 0
 
     constructor(dim: number) {
         this.dim = Math.round(dim);
@@ -126,14 +127,29 @@ export class CubeView {
     update(delta: number) {
         // this.rotating = true // temporary for testing
 
-        // if (!this.rotating) {
-        //     this.currentRotation = {
-        //         direction: Direction.regular,
-        //         side: Side.front,
-        //         amountRotated: 0
-        //     }
-        //     this.rotating = true
-        // }
+        const rotationList = [
+            {
+                direction: Direction.regular,
+                side: Side.front,
+                amountRotated: 0
+            },
+            {
+                direction: Direction.double,
+                side: Side.front,
+                amountRotated: 0
+            },
+            {
+                direction: Direction.prime,
+                side: Side.front,
+                amountRotated: 0
+            },
+        ]
+        if (!this.rotating) {
+            this.i = (this.i + 1) % rotationList.length
+            this.currentRotation = rotationList[this.i]
+
+            this.rotating = true
+        }
 
         if (this.rotating) {
             this.f(delta)
