@@ -89,8 +89,11 @@ export class CubeView {
         return this.cube;
     }
 
+    u() {
+        
+    }
+
     /**
-     * 
      * @returns the width/height of the cube.
      */
     getDimensions() {

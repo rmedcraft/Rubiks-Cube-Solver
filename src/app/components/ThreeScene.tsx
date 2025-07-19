@@ -3,6 +3,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Color, TileView } from "./TileView";
 import { CubeView, Side } from "./CubeView";
+import { rotateMatrix180, rotateMatrixClockwise, rotateMatrixCounterClockwise } from "../utils/matrixUtils";
 // import { TileView } from "./tileView";
 
 const ThreeScene: React.FC = () => {
@@ -30,9 +31,6 @@ const ThreeScene: React.FC = () => {
             const cubeView = new CubeView(3, debugMode);
             cubeView.printCube();
             scene.add(cubeView.getCube());
-
-            // console.log(tileView.mesh);
-
 
             const controls = new OrbitControls(camera, renderer.domElement);
             controls.update();
