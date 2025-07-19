@@ -1,4 +1,4 @@
-"use client"; // This is a client component 👈🏽
+"use client"; // This is a client component
 import ThreeScene from "./components/ThreeScene";
 
 export default function Home() {
