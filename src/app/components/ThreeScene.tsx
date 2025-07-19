@@ -25,6 +25,7 @@ const ThreeScene: React.FC = () => {
             scene.add(cubeView.getCube());
 
             const controls = new OrbitControls(camera, renderer.domElement);
+            controls.enablePan = false
             controls.update();
 
             // sets the controls to orbit the center of the cube by default
