@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Color, TileView } from './TileView';
 import { rotateMatrix180, rotateMatrixClockwise, rotateMatrixCounterClockwise } from '../utils/matrixUtils';
+import { colors, CubeData } from './CubeData';
 
 // determines whether the rotation is clockwise, counterclockwise, or double
 export enum Direction {
@@ -20,6 +21,7 @@ export enum Side {
 }
 
 // A rotation will have both a side and a direction
+// storing the amount rotated so the animation knows when to stop 
 export type Rotation = {
     direction: Direction,
     side: Side
@@ -29,9 +31,8 @@ export type Rotation = {
 export class CubeView {
     private dim: number;
     // private cubeData: Color[][][] = [];
-    private cubeData: TileView[][][] = [];
+    private cubeData: CubeData
     private cube: THREE.Group = new THREE.Group();
-    colors = [Color.white, Color.blue, Color.orange, Color.green, Color.red, Color.yellow];
 
     // used internally for keeping track of the current rotation and when the cube is being rotated
     private rotating: boolean = true
@@ -45,13 +46,14 @@ export class CubeView {
     constructor(dim: number) {
         this.dim = Math.round(dim);
 
+        this.cubeData = new CubeData(dim)
+
         // initialize cubeData to solved state & set up visualization
         for (let i = 0; i < 6; i++) {
-            const temp2d = [];
-            for (let r = 0; r < dim; r++) {
-                const temp1d = [];
-                for (let c = 0; c < dim; c++) {
-                    const tile = new TileView(this.colors[i]);
+            const cubeSide = this.cubeData.getSide(i as Side)
+            for (let r = 0; r < cubeSide.length; r++) {
+                for (let c = 0; c < cubeSide.length; c++) {
+                    const tile = cubeSide[c][r]
 
                     // rotate tile correctly
                     const side = i as Side;
@@ -107,11 +109,8 @@ export class CubeView {
                     this.cube.add(tile.mesh);
 
                     // add to cubeData
-                    temp1d.push(tile);
                 }
-                temp2d.push(temp1d);
             }
-            this.cubeData.push(temp2d);
         }
 
         // temporary for testing
@@ -149,9 +148,9 @@ export class CubeView {
             this.currentRotation = rotationList[this.i]
 
             this.rotating = true
-        }
 
-        if (this.rotating) {
+            // update cubeData here with the corresponding rotation
+        } else if (this.rotating) {
             this.f(delta)
         }
     }
@@ -160,21 +159,22 @@ export class CubeView {
         return this.cube;
     }
 
-    f(delta: number) {
-        const { direction } = this.currentRotation
-        // visualization
+    private groupSide(side: Side) {
         const group = new THREE.Group()
-        this.cubeData[Side.front].flat().forEach(element => {
+        this.cubeData.getSide(side).flat().forEach(element => {
             // this.cube.remove(element.mesh)
             group.add(element.mesh)
         });
+        return group
+    }
 
-        for (let i = 0; i < this.dim; i++) {
-            group.add(this.cubeData[Side.top][i][this.dim - 1].mesh)
-            group.add(this.cubeData[Side.bottom][i][this.dim - 1].mesh)
-            group.add(this.cubeData[Side.left][this.dim - 1][i].mesh)
-            group.add(this.cubeData[Side.right][this.dim - 1][i].mesh)
-        }
+    /**
+     * Determine the correct amount to rotate during one clock tick
+     * @param delta The change in time since the last clock tick
+     * @returns Updated delta value after checking various parameters
+     */
+    private getDelta(delta: number) {
+        const { direction } = this.currentRotation
 
         let maxAngle = Math.PI / 2
         if (direction === Direction.double) {
@@ -191,10 +191,14 @@ export class CubeView {
         }
         this.currentRotation.amountRotated += delta
 
-        group.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), direction === Direction.prime ? delta : -delta)
-        group.updateMatrixWorld(true)
+        if (direction === Direction.prime) {
+            delta *= -1
+        }
+        return delta
+    }
 
-
+    // for ungrouping the rotated side of the cube once rotated. 
+    private ungroupSide(group: THREE.Group) {
         while (group.children.length > 0) {
             const element = group.children[0]
             // update the world matrix based on the transformations made within the group
@@ -206,16 +210,25 @@ export class CubeView {
             // group.remove(element)
             this.cube.add(element)
         }
+    }
 
-        // data
-        if (direction === Direction.regular) {
-            rotateMatrixClockwise(this.cubeData[Side.front])
-        } else if (direction === Direction.prime) {
-            rotateMatrixCounterClockwise(this.cubeData[Side.front])
-        } else if (direction === Direction.double) {
-            rotateMatrix180(this.cubeData[Side.front])
+    f(delta: number) {
+        // visualization
+        const group = this.groupSide(Side.front)
+
+        for (let i = 0; i < this.dim; i++) {
+            group.add(this.cubeData.getSide(Side.top)[this.dim - 1][i].mesh)
+            group.add(this.cubeData.getSide(Side.bottom)[this.dim - 1][i].mesh)
+            group.add(this.cubeData.getSide(Side.right)[i][this.dim - 1].mesh)
+            group.add(this.cubeData.getSide(Side.left)[i][this.dim - 1].mesh)
         }
-        // update the top, left, bottom, and right bordering the front
+
+        delta = this.getDelta(delta)
+
+        group.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -delta)
+        group.updateMatrixWorld(true)
+
+        this.ungroupSide(group)
     }
 
     /**
@@ -239,23 +252,8 @@ export class CubeView {
         return middle;
     }
 
-    /**
-     * prints the state of the cube by printing the 3d array that represents the cube
-     */
     printCube() {
-        for (let i = 0; i < this.cubeData.length; i++) {
-            // print 2d array
-            const arr = this.cubeData[i];
-            console.log("{");
-            for (let r = 0; r < this.dim; r++) {
-                let line = "";
-                for (let c = 0; c < arr[0].length; c++) {
-                    line += arr[r][c].getColor() + ", ";
-                }
-                console.log("\t" + line + "\n");
-            }
-            console.log("}");
-        }
+        this.cubeData.printCube()
     }
 }
 

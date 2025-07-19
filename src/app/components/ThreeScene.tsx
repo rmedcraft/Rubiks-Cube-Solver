@@ -1,10 +1,8 @@
 import * as THREE from "three";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { Color, TileView } from "./TileView";
-import { CubeView, Direction, Side } from "./CubeView";
-import { rotateMatrix180, rotateMatrixClockwise, rotateMatrixCounterClockwise } from "../utils/matrixUtils";
-// import { TileView } from "./tileView";
+import { CubeView } from "./CubeView";
+
 export const scene = new THREE.Scene();
 
 const ThreeScene: React.FC = () => {
@@ -35,8 +33,8 @@ const ThreeScene: React.FC = () => {
                 // cubeView.f(Rotation.double)
             }, 3000)
 
-            const axesHelper = new THREE.AxesHelper(5)
-            scene.add(axesHelper)
+            // const axesHelper = new THREE.AxesHelper(5)
+            // scene.add(axesHelper)
 
             // const axes = [new THREE.Vector3(1, 0, 0).normalize(), new THREE.Vector3(0, 1, 0).normalize(), new THREE.Vector3(0, 0, 1).normalize()]
             // let i = 0
