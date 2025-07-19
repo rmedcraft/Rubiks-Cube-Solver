@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Color, TileView } from './TileView';
+import { rotateMatrixClockwise } from '../utils/matrixUtils';
 
 
 export class CubeView {
@@ -9,7 +10,7 @@ export class CubeView {
     private cube: THREE.Group = new THREE.Group();
     colors = [Color.white, Color.blue, Color.orange, Color.green, Color.red, Color.yellow];
 
-    constructor(dim: number, debugMode: boolean) {
+    constructor(dim: number) {
         this.dim = Math.round(dim);
 
         // initialize cubeData to solved state & set up visualization
@@ -80,9 +81,12 @@ export class CubeView {
             }
             this.cubeData.push(temp2d);
         }
-        if (debugMode) {
-            this.cubeData[Side.front][1][1].setColor(Color.green);
-        }
+
+        // offset all children to be centered at (0, 0, 0) which allows for easier rotation
+        const center = this.getCenterPoint()
+        this.cube.children.forEach((child) => {
+            child.position.sub(center)
+        })
     }
 
     getCube() {
@@ -90,7 +94,18 @@ export class CubeView {
     }
 
     u() {
-        
+        // data
+        rotateMatrixClockwise(this.cubeData[Side.front])
+        // update the top, left, bottom, and right bordering the front
+
+
+        // visualization
+        const group = new THREE.Group()
+        this.cubeData[Side.front].flat().forEach(element => {
+            group.add(element.mesh)
+        });
+
+        group.rotateZ(Math.PI / 2)
     }
 
     /**

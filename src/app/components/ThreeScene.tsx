@@ -9,14 +9,6 @@ import { rotateMatrix180, rotateMatrixClockwise, rotateMatrixCounterClockwise } 
 const ThreeScene: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const [debugMode, setDebugMode] = useState(false);
-
-    // window!.addEventListener('keydown', (event) => {
-    //     if (event.ctrlKey) {
-    //         setDebugMode(debugMode => !debugMode);
-    //         console.log("ctrl pressed, debug mode: " + debugMode);
-    //     }
-    // });
     useEffect(() => {
         if (typeof window !== "undefined") {
 
@@ -28,22 +20,42 @@ const ThreeScene: React.FC = () => {
             containerRef.current?.appendChild(renderer.domElement);
             camera.position.z = 5;
 
-            const cubeView = new CubeView(3, debugMode);
-            cubeView.printCube();
+            const cubeView = new CubeView(3);
+
             scene.add(cubeView.getCube());
 
             const controls = new OrbitControls(camera, renderer.domElement);
             controls.update();
 
             // sets the controls to orbit the center of the cube by default
-            controls.target = cubeView.getCenterPoint();
             // controls.autoRotate = true;
 
+            // setInterval(() => {
+            //     cubeView.u()
+            // }, 3000)
+
+            const axesHelper = new THREE.AxesHelper(5)
+            scene.add(axesHelper)
+
+            const axes = [new THREE.Vector3(1, 0, 0).normalize(), new THREE.Vector3(0, 1, 0).normalize(), new THREE.Vector3(0, 0, 1).normalize()]
+            let i = 0
+            let ct = 0
             function animate() {
                 controls.update();
 
                 renderer.render(scene, camera);
                 requestAnimationFrame(animate);
+
+
+                const axis = axes[i]
+                const speed = 0.02
+
+                cubeView.getCube().rotateOnWorldAxis(axis, speed)
+                ct += speed
+                if (ct >= Math.PI / 2) {
+                    i = (i + 1) % 3
+                    ct = 0
+                }
             }
 
             animate();
