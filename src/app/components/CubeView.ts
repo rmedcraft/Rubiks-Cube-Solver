@@ -38,7 +38,7 @@ export class CubeView {
     private rotating: boolean = true
     private currentRotation: Rotation = {
         direction: Direction.regular,
-        side: Side.front,
+        side: Side.left,
         amountRotated: 0
     }
     private i = 0
@@ -124,34 +124,109 @@ export class CubeView {
     }
 
     update(delta: number) {
-        // this.rotating = true // temporary for testing
-
+        // rotationList here temporarily for testing
         const rotationList = [
             {
                 direction: Direction.regular,
-                side: Side.front,
+                side: Side.left,
                 amountRotated: 0
             },
+
             {
-                direction: Direction.double,
-                side: Side.front,
+                direction: Direction.regular,
+                side: Side.top,
                 amountRotated: 0
             },
+
             {
                 direction: Direction.prime,
-                side: Side.front,
+                side: Side.left,
                 amountRotated: 0
             },
+
+            {
+                direction: Direction.prime,
+                side: Side.top,
+                amountRotated: 0
+            },
+            // {
+            //     direction: Direction.regular,
+            //     side: Side.right,
+            //     amountRotated: 0
+            // },
+
+            // {
+            //     direction: Direction.regular,
+            //     side: Side.bottom,
+            //     amountRotated: 0
+            // },
+
+            // {
+            //     direction: Direction.prime,
+            //     side: Side.right,
+            //     amountRotated: 0
+            // },
+
+            // {
+            //     direction: Direction.prime,
+            //     side: Side.bottom,
+            //     amountRotated: 0
+            // },
+            // {
+            //     direction: Direction.regular,
+            //     side: Side.front,
+            //     amountRotated: 0
+            // },
+
+            // {
+            //     direction: Direction.regular,
+            //     side: Side.bottom,
+            //     amountRotated: 0
+            // },
+
+            // {
+            //     direction: Direction.prime,
+            //     side: Side.front,
+            //     amountRotated: 0
+            // },
+
+            // {
+            //     direction: Direction.prime,
+            //     side: Side.bottom,
+            //     amountRotated: 0
+            // },
+            // {
+            //     direction: Direction.regular,
+            //     side: Side.back,
+            //     amountRotated: 0
+            // },
+            // {
+            //     direction: Direction.regular,
+            //     side: Side.top,
+            //     amountRotated: 0
+            // },
+            // {
+            //     direction: Direction.prime,
+            //     side: Side.back,
+            //     amountRotated: 0
+            // },
+            // {
+            //     direction: Direction.prime,
+            //     side: Side.top,
+            //     amountRotated: 0
+            // },
         ]
         if (!this.rotating) {
+            // update cubeData with the corresponding rotation once the rotation animation finishes
+            this.cubeData.rotateBySide(this.currentRotation)
+
             this.i = (this.i + 1) % rotationList.length
             this.currentRotation = rotationList[this.i]
 
-            this.rotating = true
 
-            // update cubeData here with the corresponding rotation
+            this.rotating = true
         } else if (this.rotating) {
-            this.f(delta)
+            this.rotateBySide(delta)
         }
     }
 
@@ -159,7 +234,29 @@ export class CubeView {
         return this.cube;
     }
 
-    private groupSide(side: Side) {
+    rotateBySide(delta: number) {
+        if (this.currentRotation.side === Side.front) {
+            this.f(delta)
+        }
+        if (this.currentRotation.side === Side.back) {
+            this.b(delta)
+        }
+        if (this.currentRotation.side === Side.left) {
+            this.l(delta)
+        }
+        if (this.currentRotation.side === Side.right) {
+            this.r(delta)
+        }
+        if (this.currentRotation.side === Side.top) {
+            this.u(delta)
+        }
+        if (this.currentRotation.side === Side.bottom) {
+            this.d(delta)
+        }
+    }
+
+    private groupSide() {
+        const side = this.currentRotation.side
         const group = new THREE.Group()
         this.cubeData.getSide(side).flat().forEach(element => {
             // this.cube.remove(element.mesh)
@@ -213,8 +310,9 @@ export class CubeView {
     }
 
     f(delta: number) {
-        // visualization
-        const group = this.groupSide(Side.front)
+        if (this.currentRotation.side !== Side.front) return
+
+        const group = this.groupSide()
 
         for (let i = 0; i < this.dim; i++) {
             group.add(this.cubeData.getSide(Side.top)[this.dim - 1][i].mesh)
@@ -226,6 +324,105 @@ export class CubeView {
         delta = this.getDelta(delta)
 
         group.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -delta)
+        group.updateMatrixWorld(true)
+
+        this.ungroupSide(group)
+    }
+
+    b(delta: number) {
+        if (this.currentRotation.side !== Side.back) return
+        const group = this.groupSide()
+
+        for (let i = 0; i < this.dim; i++) {
+            group.add(this.cubeData.getSide(Side.top)[0][i].mesh)
+            group.add(this.cubeData.getSide(Side.bottom)[0][i].mesh)
+            group.add(this.cubeData.getSide(Side.right)[i][0].mesh)
+            group.add(this.cubeData.getSide(Side.left)[i][0].mesh)
+        }
+
+        delta = this.getDelta(delta)
+
+        group.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), delta)
+        group.updateMatrixWorld(true)
+
+        this.ungroupSide(group)
+    }
+
+    l(delta: number) {
+        if (this.currentRotation.side !== Side.left) return
+
+        const group = this.groupSide()
+
+        for (let i = 0; i < this.dim; i++) {
+            group.add(this.cubeData.getSide(Side.top)[i][0].mesh)
+            group.add(this.cubeData.getSide(Side.bottom)[i][0].mesh)
+            group.add(this.cubeData.getSide(Side.front)[i][0].mesh)
+            group.add(this.cubeData.getSide(Side.back)[i][0].mesh)
+        }
+
+        delta = this.getDelta(delta)
+
+        group.rotateOnWorldAxis(new THREE.Vector3(1, 0, 0), delta)
+        group.updateMatrixWorld(true)
+
+        this.ungroupSide(group)
+    }
+
+    r(delta: number) {
+        if (this.currentRotation.side !== Side.right) return
+
+        const group = this.groupSide()
+
+        for (let i = 0; i < this.dim; i++) {
+            group.add(this.cubeData.getSide(Side.top)[i][this.dim - 1].mesh)
+            group.add(this.cubeData.getSide(Side.bottom)[i][this.dim - 1].mesh)
+            group.add(this.cubeData.getSide(Side.front)[i][this.dim - 1].mesh)
+            group.add(this.cubeData.getSide(Side.back)[i][this.dim - 1].mesh)
+        }
+
+        delta = this.getDelta(delta)
+
+        group.rotateOnWorldAxis(new THREE.Vector3(1, 0, 0), -delta)
+        group.updateMatrixWorld(true)
+
+        this.ungroupSide(group)
+    }
+
+    u(delta: number) {
+        if (this.currentRotation.side !== Side.top) return
+
+        const group = this.groupSide()
+
+        for (let i = 0; i < this.dim; i++) {
+            group.add(this.cubeData.getSide(Side.left)[this.dim - 1][i].mesh)
+            group.add(this.cubeData.getSide(Side.right)[this.dim - 1][i].mesh)
+            group.add(this.cubeData.getSide(Side.front)[this.dim - 1][i].mesh)
+            group.add(this.cubeData.getSide(Side.back)[this.dim - 1][i].mesh)
+        }
+
+        delta = this.getDelta(delta)
+
+        group.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -delta)
+        group.updateMatrixWorld(true)
+
+        this.ungroupSide(group)
+    }
+
+    d(delta: number) {
+        if (this.currentRotation.side !== Side.bottom) return
+
+        const group = this.groupSide()
+
+        for (let i = 0; i < this.dim; i++) {
+            group.add(this.cubeData.getSide(Side.left)[0][i].mesh)
+            group.add(this.cubeData.getSide(Side.right)[0][i].mesh)
+            group.add(this.cubeData.getSide(Side.front)[0][i].mesh)
+            group.add(this.cubeData.getSide(Side.back)[0][i].mesh)
+        }
+
+        delta = this.getDelta(delta)
+
+        group.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), delta)
         group.updateMatrixWorld(true)
 
         this.ungroupSide(group)

@@ -40,7 +40,7 @@ const ThreeScene: React.FC = () => {
             // let i = 0
             // let ct = 0
             const clock = new THREE.Clock()
-            const speed = 2
+            const speed = 4
             function animate() {
                 controls.update();
 
