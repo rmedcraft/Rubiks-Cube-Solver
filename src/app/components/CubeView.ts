@@ -124,7 +124,7 @@ export class CubeView {
     }
 
     update(delta: number) {
-        // rotationList here temporarily for testing
+        if (this.paused) return
         if (!this.rotating) {
             if (!this.currentRotation) {
                 this.currentRotation = this.queue.dequeue()

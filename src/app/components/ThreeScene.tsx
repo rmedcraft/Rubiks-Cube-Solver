@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import React, { useRef, useEffect, KeyboardEvent } from "react";
+import React, { useRef, useEffect } from "react";
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CubeView } from "./CubeView";
 
@@ -16,30 +16,33 @@ const ThreeScene: React.FC = () => {
             const renderer = new THREE.WebGLRenderer();
             renderer.setSize(window.innerWidth, window.innerHeight);
             containerRef.current?.appendChild(renderer.domElement);
-            camera.position.z = 5;
 
             const cubeView = new CubeView(3);
 
-            scene.add(cubeView.getCube());
+            const cube = cubeView.getCube()
+            scene.add(cube);
 
             const controls = new OrbitControls(camera, renderer.domElement);
             controls.enablePan = false
             controls.update();
 
-
-            // sets the controls to orbit the center of the cube by default
-            // controls.autoRotate = true;
-
-            // const axesHelper = new THREE.AxesHelper(5)
-            // scene.add(axesHelper)
-
-            // const axes = [new THREE.Vector3(1, 0, 0).normalize(), new THREE.Vector3(0, 1, 0).normalize(), new THREE.Vector3(0, 0, 1).normalize()]
-            // let i = 0
-            // let ct = 0
+            // position the camera nicely
+            function positionCamera() {
+                const box = new THREE.Box3().setFromObject(cube)
+                camera.position.set(1, 1, 1)
+                while (box.containsPoint(camera.position)) {
+                    camera.position.addScalar(1)
+                }
+                camera.position.addScalar(3)
+            }
+            positionCamera()
 
             window.addEventListener("keydown", (evt: any) => {
-                if (evt.key === "p") {
+                if (evt.key === "p" || evt.key === " ") {
                     cubeView.paused = !cubeView.paused
+                }
+                if (evt.key === "r") {
+                    positionCamera()
                 }
             })
 
@@ -51,10 +54,7 @@ const ThreeScene: React.FC = () => {
                 renderer.render(scene, camera);
                 requestAnimationFrame(animate);
 
-                const timeChange = clock.getDelta()
-                if (!cubeView.paused) {
-                    cubeView.update(timeChange * speed)
-                }
+                cubeView.update(clock.getDelta() * speed)
             }
 
             animate();
