@@ -299,11 +299,6 @@ export class CubeData {
             const front = this.cubeData[Side.front][this.dim - 1][i]
             const back = this.cubeData[Side.back][this.dim - 1][this.dim - 1 - i]
 
-            // group.add(this.cubeData.getSide(Side.left)[this.dim - 1][i].mesh)
-            // group.add(this.cubeData.getSide(Side.right)[this.dim - 1][i].mesh)
-            // group.add(this.cubeData.getSide(Side.front)[this.dim - 1][i].mesh)
-            // group.add(this.cubeData.getSide(Side.back)[this.dim - 1][i].mesh)
-
             if (rotation.direction === Direction.regular) {
                 // front -> left
                 this.cubeData[Side.left][this.dim - 1][i] = front

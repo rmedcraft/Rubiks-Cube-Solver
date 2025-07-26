@@ -59,52 +59,52 @@ export class CubeView {
 
                     // position tile correctly
                     if (side === Side.front) {
-                        tile.mesh.position.y = c;
-                        tile.mesh.position.x = r;
+                        tile.tile.position.y = c;
+                        tile.tile.position.x = r;
                     }
                     if (side === Side.back) {
-                        tile.mesh.position.y = c;
-                        tile.mesh.position.x = r;
-                        tile.mesh.position.z = -dim;
+                        tile.tile.position.y = c;
+                        tile.tile.position.x = r;
+                        tile.tile.position.z = -dim;
                     }
 
                     if (side === Side.left) {
-                        tile.mesh.position.z = r;
-                        tile.mesh.position.y = c;
+                        tile.tile.position.z = r;
+                        tile.tile.position.y = c;
                         // line up with the borders of the front and back
-                        tile.mesh.position.z += 0.5 - dim;
+                        tile.tile.position.z += 0.5 - dim;
 
-                        tile.mesh.position.x -= 0.5;
+                        tile.tile.position.x -= 0.5;
 
                     }
                     if (side === Side.right) {
-                        tile.mesh.position.z = r;
-                        tile.mesh.position.y = c;
+                        tile.tile.position.z = r;
+                        tile.tile.position.y = c;
                         // line up with the borders of the front and back
-                        tile.mesh.position.z += 0.5 - dim;
+                        tile.tile.position.z += 0.5 - dim;
 
-                        tile.mesh.position.x += dim - 0.5;
+                        tile.tile.position.x += dim - 0.5;
                     }
 
                     if (side === Side.top) {
-                        tile.mesh.position.y += dim - 0.5;
-                        tile.mesh.position.x = r;
-                        tile.mesh.position.z = c; // have the physical rotations match what you expect to happen in the matrix
+                        tile.tile.position.y += dim - 0.5;
+                        tile.tile.position.x = r;
+                        tile.tile.position.z = c; // have the physical rotations match what you expect to happen in the matrix
 
                         // line up with the borders of the front and back
-                        tile.mesh.position.z += 0.5 - dim;
+                        tile.tile.position.z += 0.5 - dim;
                     }
                     if (side === Side.bottom) {
-                        tile.mesh.position.y -= 0.5;
-                        tile.mesh.position.x = r;
-                        tile.mesh.position.z = c;
+                        tile.tile.position.y -= 0.5;
+                        tile.tile.position.x = r;
+                        tile.tile.position.z = c;
 
                         // line up with the borders of the front and back
-                        tile.mesh.position.z += 0.5 - dim;
+                        tile.tile.position.z += 0.5 - dim;
                     }
 
                     // add to cube group
-                    this.cube.add(tile.mesh);
+                    this.cube.add(tile.tile);
 
                     // add to cubeData
                 }
@@ -181,8 +181,8 @@ export class CubeView {
         const side = this.currentRotation!.side
         const group = new THREE.Group()
         this.cubeData.getSide(side).flat().forEach(element => {
-            // this.cube.remove(element.mesh)
-            group.add(element.mesh)
+            // this.cube.remove(element.tile)
+            group.add(element.tile)
         });
         return group
     }
@@ -237,10 +237,10 @@ export class CubeView {
         const group = this.groupSide()
 
         for (let i = 0; i < this.dim; i++) {
-            group.add(this.cubeData.getSide(Side.top)[this.dim - 1][i].mesh)
-            group.add(this.cubeData.getSide(Side.bottom)[this.dim - 1][i].mesh)
-            group.add(this.cubeData.getSide(Side.right)[i][this.dim - 1].mesh)
-            group.add(this.cubeData.getSide(Side.left)[i][this.dim - 1].mesh)
+            group.add(this.cubeData.getSide(Side.top)[this.dim - 1][i].tile)
+            group.add(this.cubeData.getSide(Side.bottom)[this.dim - 1][i].tile)
+            group.add(this.cubeData.getSide(Side.right)[i][this.dim - 1].tile)
+            group.add(this.cubeData.getSide(Side.left)[i][this.dim - 1].tile)
         }
 
         delta = this.getDelta(delta)
@@ -256,10 +256,10 @@ export class CubeView {
         const group = this.groupSide()
 
         for (let i = 0; i < this.dim; i++) {
-            group.add(this.cubeData.getSide(Side.top)[0][i].mesh)
-            group.add(this.cubeData.getSide(Side.bottom)[0][i].mesh)
-            group.add(this.cubeData.getSide(Side.right)[i][0].mesh)
-            group.add(this.cubeData.getSide(Side.left)[i][0].mesh)
+            group.add(this.cubeData.getSide(Side.top)[0][i].tile)
+            group.add(this.cubeData.getSide(Side.bottom)[0][i].tile)
+            group.add(this.cubeData.getSide(Side.right)[i][0].tile)
+            group.add(this.cubeData.getSide(Side.left)[i][0].tile)
         }
 
         delta = this.getDelta(delta)
@@ -276,10 +276,10 @@ export class CubeView {
         const group = this.groupSide()
 
         for (let i = 0; i < this.dim; i++) {
-            group.add(this.cubeData.getSide(Side.top)[i][0].mesh)
-            group.add(this.cubeData.getSide(Side.bottom)[i][0].mesh)
-            group.add(this.cubeData.getSide(Side.front)[i][0].mesh)
-            group.add(this.cubeData.getSide(Side.back)[i][0].mesh)
+            group.add(this.cubeData.getSide(Side.top)[i][0].tile)
+            group.add(this.cubeData.getSide(Side.bottom)[i][0].tile)
+            group.add(this.cubeData.getSide(Side.front)[i][0].tile)
+            group.add(this.cubeData.getSide(Side.back)[i][0].tile)
         }
 
         delta = this.getDelta(delta)
@@ -296,10 +296,10 @@ export class CubeView {
         const group = this.groupSide()
 
         for (let i = 0; i < this.dim; i++) {
-            group.add(this.cubeData.getSide(Side.top)[i][this.dim - 1].mesh)
-            group.add(this.cubeData.getSide(Side.bottom)[i][this.dim - 1].mesh)
-            group.add(this.cubeData.getSide(Side.front)[i][this.dim - 1].mesh)
-            group.add(this.cubeData.getSide(Side.back)[i][this.dim - 1].mesh)
+            group.add(this.cubeData.getSide(Side.top)[i][this.dim - 1].tile)
+            group.add(this.cubeData.getSide(Side.bottom)[i][this.dim - 1].tile)
+            group.add(this.cubeData.getSide(Side.front)[i][this.dim - 1].tile)
+            group.add(this.cubeData.getSide(Side.back)[i][this.dim - 1].tile)
         }
 
         delta = this.getDelta(delta)
@@ -316,10 +316,10 @@ export class CubeView {
         const group = this.groupSide()
 
         for (let i = 0; i < this.dim; i++) {
-            group.add(this.cubeData.getSide(Side.left)[this.dim - 1][i].mesh)
-            group.add(this.cubeData.getSide(Side.right)[this.dim - 1][i].mesh)
-            group.add(this.cubeData.getSide(Side.front)[this.dim - 1][i].mesh)
-            group.add(this.cubeData.getSide(Side.back)[this.dim - 1][i].mesh)
+            group.add(this.cubeData.getSide(Side.left)[this.dim - 1][i].tile)
+            group.add(this.cubeData.getSide(Side.right)[this.dim - 1][i].tile)
+            group.add(this.cubeData.getSide(Side.front)[this.dim - 1][i].tile)
+            group.add(this.cubeData.getSide(Side.back)[this.dim - 1][i].tile)
         }
 
         delta = this.getDelta(delta)
@@ -336,10 +336,10 @@ export class CubeView {
         const group = this.groupSide()
 
         for (let i = 0; i < this.dim; i++) {
-            group.add(this.cubeData.getSide(Side.left)[0][i].mesh)
-            group.add(this.cubeData.getSide(Side.right)[0][i].mesh)
-            group.add(this.cubeData.getSide(Side.front)[0][i].mesh)
-            group.add(this.cubeData.getSide(Side.back)[0][i].mesh)
+            group.add(this.cubeData.getSide(Side.left)[0][i].tile)
+            group.add(this.cubeData.getSide(Side.right)[0][i].tile)
+            group.add(this.cubeData.getSide(Side.front)[0][i].tile)
+            group.add(this.cubeData.getSide(Side.back)[0][i].tile)
         }
 
         delta = this.getDelta(delta)
