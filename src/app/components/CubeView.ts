@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Color, TileView } from './TileView';
-import { rotateMatrix180, rotateMatrixClockwise, rotateMatrixCounterClockwise } from '../utils/matrixUtils';
 import { colors, CubeData } from './CubeData';
+import { RotationQueue } from './RotationQueue';
 
 // determines whether the rotation is clockwise, counterclockwise, or double
 export enum Direction {
@@ -35,18 +35,16 @@ export class CubeView {
     private cube: THREE.Group = new THREE.Group();
 
     // used internally for keeping track of the current rotation and when the cube is being rotated
+    private queue: RotationQueue
     private rotating: boolean = true
-    private currentRotation: Rotation = {
-        direction: Direction.regular,
-        side: Side.left,
-        amountRotated: 0
-    }
-    private i = 0
+    private currentRotation: Rotation | undefined = undefined
+
+    public paused = false
 
     constructor(dim: number) {
         this.dim = Math.round(dim);
-
         this.cubeData = new CubeData(dim)
+        this.queue = new RotationQueue()
 
         // initialize cubeData to solved state & set up visualization
         for (let i = 0; i < 6; i++) {
@@ -113,119 +111,42 @@ export class CubeView {
             }
         }
 
-        // temporary for testing
-        // this.cubeData[Side.front][2][0].setColor(Color.white)
-
         // offset all children to be centered at (0, 0, 0) which allows for easier rotation
         const center = this.getCenterPoint()
         this.cube.children.forEach((child) => {
             child.position.sub(center)
         })
+
+        // temporary adding to the queue for testing
+        // const str = "F U F' U'"
+        const str = "F L B U R D F' L' B' U' R' D' F2 L2 B2 U2 R2 D2"
+        this.queue.pushStr(str)
     }
 
     update(delta: number) {
         // rotationList here temporarily for testing
-        const rotationList = [
-            {
-                direction: Direction.regular,
-                side: Side.left,
-                amountRotated: 0
-            },
-
-            {
-                direction: Direction.regular,
-                side: Side.top,
-                amountRotated: 0
-            },
-
-            {
-                direction: Direction.prime,
-                side: Side.left,
-                amountRotated: 0
-            },
-
-            {
-                direction: Direction.prime,
-                side: Side.top,
-                amountRotated: 0
-            },
-            // {
-            //     direction: Direction.regular,
-            //     side: Side.right,
-            //     amountRotated: 0
-            // },
-
-            // {
-            //     direction: Direction.regular,
-            //     side: Side.bottom,
-            //     amountRotated: 0
-            // },
-
-            // {
-            //     direction: Direction.prime,
-            //     side: Side.right,
-            //     amountRotated: 0
-            // },
-
-            // {
-            //     direction: Direction.prime,
-            //     side: Side.bottom,
-            //     amountRotated: 0
-            // },
-            // {
-            //     direction: Direction.regular,
-            //     side: Side.front,
-            //     amountRotated: 0
-            // },
-
-            // {
-            //     direction: Direction.regular,
-            //     side: Side.bottom,
-            //     amountRotated: 0
-            // },
-
-            // {
-            //     direction: Direction.prime,
-            //     side: Side.front,
-            //     amountRotated: 0
-            // },
-
-            // {
-            //     direction: Direction.prime,
-            //     side: Side.bottom,
-            //     amountRotated: 0
-            // },
-            // {
-            //     direction: Direction.regular,
-            //     side: Side.back,
-            //     amountRotated: 0
-            // },
-            // {
-            //     direction: Direction.regular,
-            //     side: Side.top,
-            //     amountRotated: 0
-            // },
-            // {
-            //     direction: Direction.prime,
-            //     side: Side.back,
-            //     amountRotated: 0
-            // },
-            // {
-            //     direction: Direction.prime,
-            //     side: Side.top,
-            //     amountRotated: 0
-            // },
-        ]
         if (!this.rotating) {
+            if (!this.currentRotation) {
+                this.currentRotation = this.queue.dequeue()
+                this.rotating = true
+                return
+            }
             // update cubeData with the corresponding rotation once the rotation animation finishes
             this.cubeData.rotateBySide(this.currentRotation)
 
-            this.i = (this.i + 1) % rotationList.length
-            this.currentRotation = rotationList[this.i]
+            // push the most recent rotation back into the queue, for testing rotations endlessly
+            this.queue.push(this.currentRotation)
+
+            // get the next thing in the list
+            this.currentRotation = this.queue.dequeue()
 
 
             this.rotating = true
         } else if (this.rotating) {
+            if (!this.currentRotation) {
+                this.rotating = false
+                return
+            }
             this.rotateBySide(delta)
         }
     }
@@ -235,6 +156,7 @@ export class CubeView {
     }
 
     rotateBySide(delta: number) {
+        if (!this.currentRotation) return
         if (this.currentRotation.side === Side.front) {
             this.f(delta)
         }
@@ -256,7 +178,7 @@ export class CubeView {
     }
 
     private groupSide() {
-        const side = this.currentRotation.side
+        const side = this.currentRotation!.side
         const group = new THREE.Group()
         this.cubeData.getSide(side).flat().forEach(element => {
             // this.cube.remove(element.mesh)
@@ -271,7 +193,7 @@ export class CubeView {
      * @returns Updated delta value after checking various parameters
      */
     private getDelta(delta: number) {
-        const { direction } = this.currentRotation
+        const { direction } = this.currentRotation!
 
         let maxAngle = Math.PI / 2
         if (direction === Direction.double) {
@@ -281,12 +203,12 @@ export class CubeView {
             delta *= 2
         }
 
-        if (this.currentRotation.amountRotated + delta >= maxAngle) {
+        if (this.currentRotation!.amountRotated + delta >= maxAngle) {
             // stop rotating and snap to wherever the turn is supposed to bring you
             this.rotating = false
-            delta = maxAngle - this.currentRotation.amountRotated
+            delta = maxAngle - this.currentRotation!.amountRotated
         }
-        this.currentRotation.amountRotated += delta
+        this.currentRotation!.amountRotated += delta
 
         if (direction === Direction.prime) {
             delta *= -1
@@ -310,7 +232,7 @@ export class CubeView {
     }
 
     f(delta: number) {
-        if (this.currentRotation.side !== Side.front) return
+        if (this.currentRotation!.side !== Side.front) return
 
         const group = this.groupSide()
 
@@ -330,7 +252,7 @@ export class CubeView {
     }
 
     b(delta: number) {
-        if (this.currentRotation.side !== Side.back) return
+        if (this.currentRotation!.side !== Side.back) return
         const group = this.groupSide()
 
         for (let i = 0; i < this.dim; i++) {
@@ -349,7 +271,7 @@ export class CubeView {
     }
 
     l(delta: number) {
-        if (this.currentRotation.side !== Side.left) return
+        if (this.currentRotation!.side !== Side.left) return
 
         const group = this.groupSide()
 
@@ -369,7 +291,7 @@ export class CubeView {
     }
 
     r(delta: number) {
-        if (this.currentRotation.side !== Side.right) return
+        if (this.currentRotation!.side !== Side.right) return
 
         const group = this.groupSide()
 
@@ -389,7 +311,7 @@ export class CubeView {
     }
 
     u(delta: number) {
-        if (this.currentRotation.side !== Side.top) return
+        if (this.currentRotation!.side !== Side.top) return
 
         const group = this.groupSide()
 
@@ -409,7 +331,7 @@ export class CubeView {
     }
 
     d(delta: number) {
-        if (this.currentRotation.side !== Side.bottom) return
+        if (this.currentRotation!.side !== Side.bottom) return
 
         const group = this.groupSide()
 

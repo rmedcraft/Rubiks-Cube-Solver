@@ -1,24 +1,36 @@
-Top/Bottom side: 
-               back
-     [(0, 0), (1, 0), (2, 0)]
-left [(0, 1), (1, 1), (2, 1)] right
-     [(0, 2), (1, 2), (2, 2)]
-              front
+Top/Bottom (Yellow/White) side: 
+                 green
+       [(0, 0), (1, 0), (2, 0)]
+orange [(0, 1), (1, 1), (2, 1)] red
+       [(0, 2), (1, 2), (2, 2)]
+                 blue
 
-Front/Back side: 
-               top
-     [(0, 2), (1, 2), (2, 2)]
-left [(0, 1), (1, 1), (2, 1)] right
-     [(0, 0), (1, 0), (2, 0)]
-              bottom
+Front/Back (Blue/Green) side: 
+                yellow
+       [(0, 2), (1, 2), (2, 2)]
+orange [(0, 1), (1, 1), (2, 1)] red
+       [(0, 0), (1, 0), (2, 0)]
+                white
 
-Left/Right side: 
-                top
+                white
+       [(0, 0), (1, 0), (2, 0)]
+orange [(0, 1), (1, 1), (2, 1)] red
+       [(0, 2), (1, 2), (2, 2)]
+                yellow
+
+Left/Right (Orange/Red) side: 
+               yellow
       [(2, 2), (1, 2), (0, 2)]
-front [(2, 1), (1, 1), (0, 1)] back
+blue  [(2, 1), (1, 1), (0, 1)] green
       [(2, 0), (1, 0), (0, 0)]
-               bottom
+                white
+
+                white
+       [(0, 0), (1, 0), (2, 0)]
+green  [(0, 1), (1, 1), (2, 1)] blue
+       [(0, 2), (1, 2), (2, 2)]
+                yellow
 
 Note: 
-- All sides are the mirror image of the opposite side, meaning (0, 0) is the same relative to any other side on the top and the bottom 
+- All sides are the mirror image of the opposite side, meaning (0, 0) is the same relative to any other side on the top (yellow) and the bottom (white)
 - This is a general pattern that continues for larger cubes

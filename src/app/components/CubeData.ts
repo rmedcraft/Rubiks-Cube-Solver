@@ -1,9 +1,8 @@
-import { throwIfDisallowedDynamic } from "next/dist/server/app-render/dynamic-rendering";
 import { rotateMatrix180, rotateMatrixClockwise, rotateMatrixCounterClockwise } from "../utils/matrixUtils";
 import { Direction, Rotation, Side } from "./CubeView";
 import { Color, TileView } from "./TileView";
 
-export const colors = [Color.white, Color.blue, Color.red, Color.green, Color.orange, Color.yellow];
+export const colors = [Color.white, Color.blue, Color.orange, Color.green, Color.red, Color.yellow];
 
 
 export class CubeData {
@@ -60,7 +59,7 @@ export class CubeData {
         const side = rotation.side
 
         if (rotation.direction === Direction.regular) {
-            if (side === Side.left || side === Side.right) {
+            if (side === Side.left || side === Side.bottom || side === Side.front) {
                 rotateMatrixCounterClockwise(this.cubeData[side])
             } else {
                 rotateMatrixClockwise(this.cubeData[side])
@@ -68,7 +67,7 @@ export class CubeData {
             // rotateMatrixCounterClockwise(this.cubeData[side])
         }
         if (rotation.direction === Direction.prime) {
-            if (side === Side.left || side === Side.right) {
+            if (side === Side.left || side === Side.bottom || side === Side.front) {
                 rotateMatrixClockwise(this.cubeData[side])
             } else {
                 rotateMatrixCounterClockwise(this.cubeData[side])
@@ -88,30 +87,45 @@ export class CubeData {
         this.rotateFace(rotation)
 
         for (let i = 0; i < this.dim; i++) {
+            // (0, 2) on the top goes to (2, 2) on the right
+            // (2, 2) on the right goes to (2, 2) on the bottom
+            // (2, 2) on the bottom goes to (2, 0) on the left
+            // (2, 0) on the left goes to (0, 2) on the top
+
+            // (2, 2) on the top goes to (2, 0) on the right
+            // (2, 0) on the right goes to (0, 2) on the bottom
+            // (0, 2) on the bottom goes to (2, 2) on the left
+            // (2, 2) on the left goes to (2, 2) on the right
+
+            // for front
+            // - top & left start from the start, bottom & right start from the end
+            // - top & bottom increment x, [max][i]
+            // - left and right increment y, [i][max]  
+
             // (0, 2) on the top would move to (2, 2) on the bottom, see documents/cubeLayout.txt
             const top = this.cubeData[Side.top][this.dim - 1][i]
             const bottom = this.cubeData[Side.bottom][this.dim - 1][this.dim - 1 - i]
 
-            const left = this.cubeData[Side.left][this.dim - 1 - i][this.dim - 1]
-            const right = this.cubeData[Side.right][i][this.dim - 1]
+            const left = this.cubeData[Side.left][i][this.dim - 1]
+            const right = this.cubeData[Side.right][this.dim - 1 - i][this.dim - 1]
 
-            if (rotation.direction === Direction.prime) {
+            if (rotation.direction === Direction.regular) {
                 // top -> right
-                this.cubeData[Side.right][i][this.dim - 1] = top
+                this.cubeData[Side.right][this.dim - 1 - i][this.dim - 1] = top
                 // right -> bottom 
                 this.cubeData[Side.bottom][this.dim - 1][this.dim - 1 - i] = right
                 // bottom -> left
-                this.cubeData[Side.left][this.dim - 1 - i][this.dim - 1] = bottom
+                this.cubeData[Side.left][i][this.dim - 1] = bottom
                 // left -> top
                 this.cubeData[Side.top][this.dim - 1][i] = left
             }
-            if (rotation.direction === Direction.regular) {
+            if (rotation.direction === Direction.prime) {
                 // top -> left
-                this.cubeData[Side.left][this.dim - 1 - i][this.dim - 1] = top
+                this.cubeData[Side.left][i][this.dim - 1] = top
                 // left -> bottom
                 this.cubeData[Side.bottom][this.dim - 1][this.dim - 1 - i] = left
                 // bottom -> right
-                this.cubeData[Side.right][i][this.dim - 1] = bottom
+                this.cubeData[Side.right][this.dim - 1 - i][this.dim - 1] = bottom
                 // right -> top
                 this.cubeData[Side.top][this.dim - 1][i] = right
             }
@@ -121,9 +135,9 @@ export class CubeData {
                 // bottom -> top
                 this.cubeData[Side.top][this.dim - 1][i] = bottom
                 // left -> right
-                this.cubeData[Side.right][i][this.dim - 1] = left
+                this.cubeData[Side.right][this.dim - 1 - i][this.dim - 1] = left
                 // right -> left
-                this.cubeData[Side.left][this.dim - 1 - i][this.dim - 1] = right
+                this.cubeData[Side.left][i][this.dim - 1] = right
             }
         }
     }
@@ -134,36 +148,51 @@ export class CubeData {
         this.rotateFace(rotation)
 
         for (let i = 0; i < this.dim; i++) {
-            const top = this.cubeData[Side.top][0][i]
-            const bottom = this.cubeData[Side.bottom][0][this.dim - 1 - i]
+            // back side regular rotation
+            // (2, 0) on the top goes to (0, 2) on the left
+            // (0, 2) on the left goes to (0, 0) on the bottom
+            // (0, 0) on the bottom goes to (0, 0) on the right
+            // (0, 0) on the right goes to (0, 2) on the top
+
+            // (0, 0) on the top goes to (0, 0) on the left
+            // (0, 0) on the left goes to (2, 0) on the bottom
+            // (2, 0) on the bottom goes to (0, 2) on the right
+            // (0, 2) on the right goes to (0, 0) on the top
+            // for back
+            // - top & left start from the end, bottom & right start from the start
+            // - top & bottom increment x, [0][i]
+            // - left and right increment y, [i][0]  
+
+            const top = this.cubeData[Side.top][0][this.dim - 1 - i]
+            const bottom = this.cubeData[Side.bottom][0][i]
 
             const left = this.cubeData[Side.left][this.dim - 1 - i][0]
             const right = this.cubeData[Side.right][i][0]
-            if (rotation.direction === Direction.prime) {
+            if (rotation.direction === Direction.regular) {
                 // top -> left
                 this.cubeData[Side.left][this.dim - 1 - i][0] = top
                 // left -> bottom
-                this.cubeData[Side.bottom][0][this.dim - 1 - i] = left
+                this.cubeData[Side.bottom][0][i] = left
                 // bottom -> right
                 this.cubeData[Side.right][i][0] = bottom
                 // right -> top
-                this.cubeData[Side.top][0][i] = right
+                this.cubeData[Side.top][0][this.dim - 1 - i] = right
             }
-            if (rotation.direction === Direction.regular) {
+            if (rotation.direction === Direction.prime) {
                 // top -> right
                 this.cubeData[Side.right][i][0] = top
                 // right -> bottom
-                this.cubeData[Side.bottom][0][this.dim - 1 - i] = right
+                this.cubeData[Side.bottom][0][i] = right
                 // bottom -> left
                 this.cubeData[Side.left][this.dim - 1 - i][0] = bottom
                 // left -> top
-                this.cubeData[Side.top][0][i] = left
+                this.cubeData[Side.top][0][this.dim - 1 - i] = left
             }
-            if (rotation.direction === Direction.regular) {
+            if (rotation.direction === Direction.double) {
                 // top -> bottom
-                this.cubeData[Side.bottom][0][this.dim - 1 - i] = top
+                this.cubeData[Side.bottom][0][i] = top
                 // bottom -> top
-                this.cubeData[Side.top][0][i] = bottom
+                this.cubeData[Side.top][0][this.dim - 1 - i] = bottom
                 // left -> right
                 this.cubeData[Side.right][i][0] = left
                 // right -> left

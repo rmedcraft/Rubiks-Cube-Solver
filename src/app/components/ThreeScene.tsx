@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, KeyboardEvent } from "react";
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CubeView } from "./CubeView";
 
@@ -26,12 +26,9 @@ const ThreeScene: React.FC = () => {
             controls.enablePan = false
             controls.update();
 
+
             // sets the controls to orbit the center of the cube by default
             // controls.autoRotate = true;
-
-            setInterval(() => {
-                // cubeView.f(Rotation.double)
-            }, 3000)
 
             // const axesHelper = new THREE.AxesHelper(5)
             // scene.add(axesHelper)
@@ -39,6 +36,13 @@ const ThreeScene: React.FC = () => {
             // const axes = [new THREE.Vector3(1, 0, 0).normalize(), new THREE.Vector3(0, 1, 0).normalize(), new THREE.Vector3(0, 0, 1).normalize()]
             // let i = 0
             // let ct = 0
+
+            window.addEventListener("keydown", (evt: any) => {
+                if (evt.key === "p") {
+                    cubeView.paused = !cubeView.paused
+                }
+            })
+
             const clock = new THREE.Clock()
             const speed = 4
             function animate() {
@@ -47,18 +51,10 @@ const ThreeScene: React.FC = () => {
                 renderer.render(scene, camera);
                 requestAnimationFrame(animate);
 
-                cubeView.update(clock.getDelta() * speed)
-
-
-                // const axis = axes[i]
-                // const speed = 0.02
-
-                // cubeView.getCube().rotateOnWorldAxis(axis, speed)
-                // ct += speed
-                // if (ct >= Math.PI / 2) {
-                //     i = (i + 1) % 3
-                //     ct = 0
-                // }
+                const timeChange = clock.getDelta()
+                if (!cubeView.paused) {
+                    cubeView.update(timeChange * speed)
+                }
             }
 
             animate();
