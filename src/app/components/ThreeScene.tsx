@@ -2,6 +2,7 @@ import * as THREE from "three";
 import React, { useRef, useEffect } from "react";
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CubeView } from "./CubeView";
+import { WebGL } from "three/examples/jsm/Addons.js";
 
 export const scene = new THREE.Scene();
 
@@ -10,7 +11,6 @@ const ThreeScene: React.FC = () => {
 
     useEffect(() => {
         if (typeof window !== "undefined") {
-
             // initialize three.js scene here
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer();
@@ -72,13 +72,17 @@ const ThreeScene: React.FC = () => {
 
             window.addEventListener('resize', handleResize);
 
-            // Clean up the event listener when the component is unmounted
+            // Clean up when component is unmounted
             return () => {
+                scene.remove(cube)
+
                 window.removeEventListener('resize', handleResize);
+
+                renderer.dispose()
+                renderer.domElement.remove()
             };
         }
     }, []);
-
     return <div ref={containerRef} />;
 };
 
