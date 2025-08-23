@@ -4,25 +4,17 @@ import React, { useRef, useEffect, useState } from "react";
 import { OrbitControls } from '@react-three/drei'
 import { CubeView, CubeViewHandle } from "./CubeViewTest";
 import { Canvas } from "@react-three/fiber";
-import { Color, TileView, TileViewHandle } from "./TileViewTest";
 import { addCleanupEventListener } from "../utils/eventListener";
 
 // export const scene = new THREE.Scene();
 
 export default function ThreeScene() {
-    const [paused, setPaused] = useState(false)
-    // let paused = false
-    const pausedRef = useRef<boolean>(paused)
+    const pausedRef = useRef<boolean>(false)
 
-    useEffect(() => {
-        pausedRef.current = paused
-    }, [paused])
-
-    // const tileRef = useRef<TileViewHandle>(null)
     const cubeRef = useRef<CubeViewHandle>(null)
 
     const clockRef = useRef(new THREE.Clock())
-    const speedRef = useRef(2)
+    const speedRef = useRef(4)
 
     const frameIDRef = useRef<number | null>(null)
 
@@ -43,7 +35,7 @@ export default function ThreeScene() {
 
     addCleanupEventListener(window, "keydown", (evt) => {
         if (evt.key === "p" || evt.key === " ") {
-            setPaused((paused) => !paused)
+            pausedRef.current = !pausedRef.current
         }
     })
 
@@ -52,7 +44,7 @@ export default function ThreeScene() {
             <Canvas style={{ width: "100vw", height: "100vh" }}>
                 <OrbitControls target={[0, 0, 0]} />
 
-                <CubeView ref={cubeRef} paused={paused} dim={3} />
+                <CubeView ref={cubeRef} paused={pausedRef} dim={3} />
             </Canvas>
         </div>
     )

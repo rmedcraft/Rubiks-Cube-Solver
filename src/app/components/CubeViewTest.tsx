@@ -37,18 +37,12 @@ export interface CubeViewHandle {
 }
 
 interface CubeViewProps {
-    paused: boolean,
+    paused: React.RefObject<boolean>,
     dim: number,
 }
 
 export const CubeView = forwardRef<CubeViewHandle, CubeViewProps>((props: any, ref) => {
     const { paused, dim } = props
-    const pausedRef = useRef<boolean>(paused)
-
-    useEffect(() => {
-        pausedRef.current = paused
-    }, [paused])
-
 
     const rotatingRef = useRef<boolean>(false)
 
@@ -59,12 +53,11 @@ export const CubeView = forwardRef<CubeViewHandle, CubeViewProps>((props: any, r
 
     const cubeRef = useRef<THREE.Group>(null)
     const cubeDataRef = useRef<CubeData>(new CubeData(dim))
+
     const cubeData = cubeDataRef.current
 
-
     function update(delta: number) {
-        if (pausedRef.current) return
-
+        if (paused.current) return
 
         if (!rotatingRef.current) {
             if (!currentRotationRef.current) {
@@ -86,7 +79,6 @@ export const CubeView = forwardRef<CubeViewHandle, CubeViewProps>((props: any, r
         } else if (rotatingRef.current) {
             if (!currentRotationRef.current) {
                 rotatingRef.current = false
-
                 return
             }
             rotateBySide(delta)
