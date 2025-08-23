@@ -2,13 +2,15 @@ import * as THREE from "three";
 import React, { useRef, useEffect } from "react";
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CubeView } from "./CubeView";
-import { WebGL } from "three/examples/jsm/Addons.js";
+import { PageUI } from "./PageUI";
 
 export const scene = new THREE.Scene();
 
-const ThreeScene: React.FC = () => {
-    const containerRef = useRef<HTMLDivElement>(null);
+export default function ThreeScene(props: any) {
 
+    const { paused, setPaused } = props.states.paused
+
+    const containerRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         if (typeof window !== "undefined") {
             // initialize three.js scene here
@@ -85,5 +87,3 @@ const ThreeScene: React.FC = () => {
     }, []);
     return <div ref={containerRef} />;
 };
-
-export default ThreeScene;
