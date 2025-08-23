@@ -1,29 +1,24 @@
+import { createRef, RefObject, useRef } from "react";
 import { rotateMatrix180, rotateMatrixClockwise, rotateMatrixCounterClockwise } from "../utils/matrixUtils";
 import { Direction, Rotation, Side } from "./CubeView";
-import { Color, TileView } from "./TileView";
+import { Color } from "./TileView";
+import { TileViewHandle } from "./TileView";
 
 export const colors = [Color.white, Color.blue, Color.orange, Color.green, Color.red, Color.yellow];
 
 
 export class CubeData {
-    private cubeData: TileView[][][] = [];
+    private cubeData: RefObject<TileViewHandle | null>[][][] = [];
     private dim: number;
 
     constructor(dim: number) {
         this.dim = Math.floor(dim)
 
-        for (let i = 0; i < 6; i++) {
-            const temp2d = [];
-            for (let r = 0; r < this.dim; r++) {
-                const temp1d = [];
-                for (let c = 0; c < this.dim; c++) {
-                    const tile = new TileView(colors[i]);
-                    temp1d.push(tile)
-                }
-                temp2d.push(temp1d)
-            }
-            this.cubeData.push(temp2d)
-        }
+        this.cubeData = Array.from({ length: 6 }, () =>
+            Array.from({ length: dim }, () =>
+                Array.from({ length: dim }, () => createRef<TileViewHandle>())
+            )
+        )
     }
 
     getSide(side: Side) {
@@ -64,7 +59,6 @@ export class CubeData {
             } else {
                 rotateMatrixClockwise(this.cubeData[side])
             }
-            // rotateMatrixCounterClockwise(this.cubeData[side])
         }
         if (rotation.direction === Direction.prime) {
             if (side === Side.left || side === Side.bottom || side === Side.front) {
@@ -72,7 +66,6 @@ export class CubeData {
             } else {
                 rotateMatrixCounterClockwise(this.cubeData[side])
             }
-            // rotateMatrixClockwise(this.cubeData[side])
         }
         if (rotation.direction === Direction.double) {
             rotateMatrix180(this.cubeData[side])
@@ -390,7 +383,8 @@ export class CubeData {
             for (let r = 0; r < this.dim; r++) {
                 let line = "";
                 for (let c = 0; c < arr[0].length; c++) {
-                    line += arr[r][c].getColor() + ", ";
+                    if (!arr[r][c].current) continue;
+                    line += arr[r][c].current!.getColor() + ", ";
                 }
                 console.log("\t" + line + "\n");
             }
