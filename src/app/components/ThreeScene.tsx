@@ -31,7 +31,7 @@ export default function ThreeScene() {
 
     const dim = 3
     return (
-        <Canvas onCreated={({ camera }) => positionCamera(camera)} style={{ width: "100vw", height: "100vh" }}>
+        <Canvas gl={{ antialias: true, toneMapping: THREE.NoToneMapping }} onCreated={({ camera }) => positionCamera(camera)} style={{ width: "100vw", height: "100vh" }}>
             <OrbitControls position0={new THREE.Vector3(1, 1, 1).multiplyScalar(dim)} target={[0, 0, 0]} />
 
             <CubeView ref={cubeRef} paused={pausedRef} dim={dim} />
