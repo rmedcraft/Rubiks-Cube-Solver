@@ -2,7 +2,7 @@ import { createRef, RefObject, useRef } from "react";
 import { rotateMatrix180, rotateMatrixClockwise, rotateMatrixCounterClockwise } from "../utils/matrixUtils";
 import { Direction, Rotation, Side } from "./CubeView";
 import { Color } from "./TileView";
-import { TileViewHandle } from "./TileViewTest";
+import { TileViewHandle } from "./TileView";
 
 export const colors = [Color.white, Color.blue, Color.orange, Color.green, Color.red, Color.yellow];
 

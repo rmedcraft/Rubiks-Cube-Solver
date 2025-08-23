@@ -1,8 +1,8 @@
-import { extend } from "@react-three/fiber";
+import { extend, useFrame } from "@react-three/fiber";
 import { forwardRef, useEffect, useImperativeHandle, useReducer, useRef, useState } from "react";
 import * as THREE from "three"
-import { colors, CubeData } from "./CubeDataTest";
-import { TileView } from "./TileViewTest";
+import { colors, CubeData } from "./CubeData";
+import { TileView } from "./TileView";
 import { RotationQueue } from "./RotationQueue";
 
 // determines whether the rotation is clockwise, counterclockwise, or double
@@ -32,8 +32,7 @@ export type Rotation = {
 
 
 export interface CubeViewHandle {
-    test: () => number,
-    update: (delta: number) => void
+    getCube: () => THREE.Group | null
 }
 
 interface CubeViewProps {
@@ -56,6 +55,7 @@ export const CubeView = forwardRef<CubeViewHandle, CubeViewProps>((props: any, r
 
     const cubeData = cubeDataRef.current
 
+    // called every frame to update the cube rotation animation
     function update(delta: number) {
         if (paused.current) return
 
@@ -85,11 +85,15 @@ export const CubeView = forwardRef<CubeViewHandle, CubeViewProps>((props: any, r
         }
     }
 
-    useImperativeHandle(ref, () => ({
-        test: () => 3,
-        update,
-    }))
 
+    const speed = 4
+    useFrame((state, delta, frame) => {
+        update(delta * speed)
+    })
+
+    useImperativeHandle(ref, () => ({
+        getCube: () => cubeRef.current
+    }))
 
     useEffect(() => {
         if (!cubeRef.current) return
@@ -191,7 +195,6 @@ export const CubeView = forwardRef<CubeViewHandle, CubeViewProps>((props: any, r
     )
 
     function rotateBySide(delta: number) {
-        console.log("rotating")
         if (!currentRotationRef.current) return
         if (currentRotationRef.current.side === Side.front) {
             f(delta)
