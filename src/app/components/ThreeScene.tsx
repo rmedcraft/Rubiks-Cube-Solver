@@ -1,89 +1,137 @@
 import * as THREE from "three";
-import React, { useRef, useEffect } from "react";
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { CubeView } from "./CubeView";
-import { WebGL } from "three/examples/jsm/Addons.js";
+import React, { useRef, useEffect, useState } from "react";
+// import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { OrbitControls } from '@react-three/drei'
+import { CubeView, CubeViewHandle } from "./CubeViewTest";
+import { Canvas } from "@react-three/fiber";
+import { Color, TileView, TileViewHandle } from "./TileViewTest";
+import { addCleanupEventListener } from "../utils/eventListener";
 
-export const scene = new THREE.Scene();
+// export const scene = new THREE.Scene();
 
-const ThreeScene: React.FC = () => {
-    const containerRef = useRef<HTMLDivElement>(null);
+export default function ThreeScene() {
+    const [paused, setPaused] = useState(false)
+    // let paused = false
+    const pausedRef = useRef<boolean>(paused)
 
     useEffect(() => {
-        if (typeof window !== "undefined") {
-            // initialize three.js scene here
-            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            containerRef.current?.appendChild(renderer.domElement);
+        pausedRef.current = paused
+    }, [paused])
 
-            const cubeView = new CubeView(3);
+    // const tileRef = useRef<TileViewHandle>(null)
+    const cubeRef = useRef<CubeViewHandle>(null)
 
-            const cube = cubeView.getCube()
-            scene.add(cube);
+    const clockRef = useRef(new THREE.Clock())
+    const speedRef = useRef(2)
 
-            const controls = new OrbitControls(camera, renderer.domElement);
-            controls.enablePan = false
-            controls.update();
+    const frameIDRef = useRef<number | null>(null)
 
-            // position the camera nicely
-            function positionCamera() {
-                const box = new THREE.Box3().setFromObject(cube)
-                camera.position.set(1, 1, 1)
-                while (box.containsPoint(camera.position)) {
-                    camera.position.addScalar(1)
+    useEffect(() => {
+        function animate() {
+            if (cubeRef.current) {
+                const delta = clockRef.current.getDelta() * speedRef.current
+                if (!pausedRef.current) {
+                    cubeRef.current.update(delta)
                 }
-                camera.position.addScalar(3)
             }
-            positionCamera()
-
-            window.addEventListener("keydown", (evt: any) => {
-                if (evt.key === "p" || evt.key === " ") {
-                    cubeView.paused = !cubeView.paused
-                }
-                if (evt.key === "r") {
-                    positionCamera()
-                }
-            })
-
-            const clock = new THREE.Clock()
-            const speed = 4
-            function animate() {
-                controls.update();
-
-                renderer.render(scene, camera);
-                requestAnimationFrame(animate);
-
-                cubeView.update(clock.getDelta() * speed)
-            }
-
-            animate();
-
-            // handle resizing the page
-            const handleResize = () => {
-                const width = window.innerWidth;
-                const height = window.innerHeight;
-
-                camera.aspect = width / height;
-                camera.updateProjectionMatrix();
-
-                renderer.setSize(width, height);
-            };
-
-            window.addEventListener('resize', handleResize);
-
-            // Clean up when component is unmounted
-            return () => {
-                scene.remove(cube)
-
-                window.removeEventListener('resize', handleResize);
-
-                renderer.dispose()
-                renderer.domElement.remove()
-            };
+            frameIDRef.current = requestAnimationFrame(animate);
         }
-    }, []);
-    return <div ref={containerRef} />;
-};
 
-export default ThreeScene;
+        frameIDRef.current = requestAnimationFrame(animate)
+        return () => cancelAnimationFrame(frameIDRef.current!)
+    }, [])
+
+    addCleanupEventListener(window, "keydown", (evt) => {
+        if (evt.key === "p" || evt.key === " ") {
+            setPaused((paused) => !paused)
+        }
+    })
+
+    return (
+        <div>
+            <Canvas style={{ width: "100vw", height: "100vh" }}>
+                <OrbitControls target={[0, 0, 0]} />
+
+                <CubeView ref={cubeRef} paused={paused} dim={3} />
+            </Canvas>
+        </div>
+    )
+
+    // const containerRef = useRef<HTMLDivElement>(null);
+
+    // useEffect(() => {
+    //     if (typeof window !== "undefined") {
+    //         // initialize three.js scene here
+    //         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    //         const renderer = new THREE.WebGLRenderer();
+    //         renderer.setSize(window.innerWidth, window.innerHeight);
+    //         containerRef.current?.appendChild(renderer.domElement);
+
+    //         const cubeView = new CubeView(3);
+
+    //         const cube = cubeView.getCube()
+    //         scene.add(cube);
+
+    //         const controls = new OrbitControls(camera, renderer.domElement);
+    //         controls.enablePan = false
+    //         controls.update();
+
+    //         // position the camera nicely
+    //         function positionCamera() {
+    //             const box = new THREE.Box3().setFromObject(cube)
+    //             camera.position.set(1, 1, 1)
+    //             while (box.containsPoint(camera.position)) {
+    //                 camera.position.addScalar(1)
+    //             }
+    //             camera.position.addScalar(3)
+    //         }
+    //         positionCamera()
+
+    //         window.addEventListener("keydown", (evt: any) => {
+    //             if (evt.key === "p" || evt.key === " ") {
+    //                 cubeView.paused = !cubeView.paused
+    //             }
+    //             if (evt.key === "r") {
+    //                 positionCamera()
+    //             }
+    //         })
+
+    //         const clock = new THREE.Clock()
+    //         const speed = 4
+    //         function animate() {
+    //             controls.update();
+
+    //             renderer.render(scene, camera);
+    //             requestAnimationFrame(animate);
+
+    //             cubeView.update(clock.getDelta() * speed)
+    //         }
+
+    //         animate();
+
+    //         // handle resizing the page
+    //         const handleResize = () => {
+    //             const width = window.innerWidth;
+    //             const height = window.innerHeight;
+
+    //             camera.aspect = width / height;
+    //             camera.updateProjectionMatrix();
+
+    //             renderer.setSize(width, height);
+    //         };
+
+    //         window.addEventListener('resize', handleResize);
+
+    //         // Clean up when component is unmounted
+    //         return () => {
+    //             scene.remove(cube)
+
+    //             window.removeEventListener('resize', handleResize);
+
+    //             renderer.dispose()
+    //             renderer.domElement.remove()
+    //         };
+    //     }
+    // }, []);
+    // return <div ref={containerRef} />;
+};

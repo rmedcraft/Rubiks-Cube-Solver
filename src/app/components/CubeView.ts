@@ -117,8 +117,6 @@ export class CubeView {
             child.position.sub(center)
         })
 
-        // temporary adding to the queue for testing
-        // const str = "F U F' U'"
         const str = "F L B U R D F' L' B' U' R' D' F2 L2 B2 U2 R2 D2"
         this.queue.pushStr(str)
     }
