@@ -1,5 +1,5 @@
 import { extend, useFrame } from "@react-three/fiber";
-import { forwardRef, useEffect, useImperativeHandle, useReducer, useRef, useState } from "react";
+import { forwardRef, memo, useEffect, useImperativeHandle, useReducer, useRef, useState } from "react";
 import * as THREE from "three"
 import { colors, CubeData } from "./CubeData";
 import { TileView } from "./TileView";
@@ -40,8 +40,8 @@ interface CubeViewProps {
     dim: number,
 }
 
-export const CubeView = forwardRef<CubeViewHandle, CubeViewProps>((props: any, ref) => {
-    const { paused, dim } = props
+export const CubeView = memo(forwardRef<CubeViewHandle, CubeViewProps>((props: any, ref) => {
+    const { paused, pausedTest, dim } = props
 
     const rotatingRef = useRef<boolean>(false)
 
@@ -58,6 +58,7 @@ export const CubeView = forwardRef<CubeViewHandle, CubeViewProps>((props: any, r
     // called every frame to update the cube rotation animation
     function update(delta: number) {
         if (paused.current) return
+        // if (pausedTest) return
 
         if (!rotatingRef.current) {
             if (!currentRotationRef.current) {
@@ -406,4 +407,4 @@ export const CubeView = forwardRef<CubeViewHandle, CubeViewProps>((props: any, r
         cubeRef.current.localToWorld(middle);
         return middle;
     }
-})
+}))
