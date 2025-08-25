@@ -32,7 +32,8 @@ export type Rotation = {
 
 
 export interface CubeViewHandle {
-    getCube: () => THREE.Group | null
+    getCube: () => THREE.Group | null,
+    scramble: () => void
 }
 
 interface CubeViewProps {
@@ -41,7 +42,7 @@ interface CubeViewProps {
 }
 
 export const CubeView = memo(forwardRef<CubeViewHandle, CubeViewProps>((props: any, ref) => {
-    const { paused, pausedTest, dim } = props
+    const { paused, dim } = props
 
     const rotatingRef = useRef<boolean>(false)
 
@@ -58,7 +59,6 @@ export const CubeView = memo(forwardRef<CubeViewHandle, CubeViewProps>((props: a
     // called every frame to update the cube rotation animation
     function update(delta: number) {
         if (paused.current) return
-        // if (pausedTest) return
 
         if (!rotatingRef.current) {
             if (!currentRotationRef.current) {
@@ -86,6 +86,9 @@ export const CubeView = memo(forwardRef<CubeViewHandle, CubeViewProps>((props: a
         }
     }
 
+    function scramble() {
+        console.log("get scrambled bozo")
+    }
 
     const speed = 4
     useFrame((state, delta, frame) => {
@@ -93,7 +96,8 @@ export const CubeView = memo(forwardRef<CubeViewHandle, CubeViewProps>((props: a
     })
 
     useImperativeHandle(ref, () => ({
-        getCube: () => cubeRef.current
+        getCube: () => cubeRef.current,
+        scramble,
     }))
 
     useEffect(() => {
