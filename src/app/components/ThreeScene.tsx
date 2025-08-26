@@ -1,15 +1,13 @@
 import * as THREE from "three";
-import React, { useRef, useEffect, useState, forwardRef, useImperativeHandle } from "react";
-// import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import React, { useRef, forwardRef, useImperativeHandle } from "react";
 import { OrbitControls } from '@react-three/drei'
 import { CubeView, CubeViewHandle } from "./CubeView";
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import { addCleanupEventListener } from "../utils/eventListener";
-import { propagateServerField } from "next/dist/server/lib/render-server";
 
 // export const scene = new THREE.Scene();
 export interface ThreeSceneHandle {
-    scramble: () => void
+    getCubeRef: () => React.RefObject<CubeViewHandle | null>
 }
 
 export interface ThreeSceneProps {
@@ -38,7 +36,7 @@ export const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props: 
     })
 
     useImperativeHandle(ref, () => ({
-        scramble: () => { console.log("idk") }
+        getCubeRef: () => cubeRef
     }))
 
     const dim = 3

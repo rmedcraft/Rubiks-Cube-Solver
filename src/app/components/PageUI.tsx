@@ -1,8 +1,32 @@
+import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { RippleButton } from "./ui/rippleButton";
 import { BsPause, BsPlay } from "react-icons/bs";
+import { CubeViewHandle } from "./CubeView";
+import { ThreeSceneHandle } from "./ThreeScene";
 
-export function PageUI(props: any) {
+interface PageUIProps {
+    paused: boolean,
+    setPaused: Dispatch<SetStateAction<boolean>>,
+    sceneRef: React.RefObject<ThreeSceneHandle>
+}
+
+export function PageUI(props: PageUIProps) {
     const { paused, setPaused, sceneRef } = props
+    let cubeRef = useRef<CubeViewHandle>(null)
+    const [state, setState] = useState()
+
+    useEffect(() => {
+        if (!sceneRef.current) return
+        console.log("getCubeRef")
+        cubeRef = sceneRef.current.getCubeRef()
+        console.log(cubeRef.current)
+    }, [])
+
+    function scramble() {
+        if (!cubeRef.current) return
+        console.log("scrambling")
+        cubeRef.current.scramble()
+    }
 
     return (
         <div className="absolute inset-0 w-screen h-screen pointer-events-none">
@@ -13,7 +37,7 @@ export function PageUI(props: any) {
             </div>
             <div className="absolute bottom-2 w-screen flex flex-row justify-center gap-3">
                 <div className=" pointer-events-auto">
-                    <RippleButton variant="default" >
+                    <RippleButton variant="default" onClick={scramble} >
                         {/* onClick={sceneRef.current.scramble()} */}
                         Scramble
                     </RippleButton>

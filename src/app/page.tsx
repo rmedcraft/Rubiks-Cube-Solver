@@ -3,10 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import { ThreeScene, ThreeSceneHandle } from "./components/ThreeScene";
 import { WebGL } from "three/examples/jsm/Addons.js";
 import { PageUI } from "./components/PageUI";
+import { CubeViewHandle } from "./components/CubeView";
 
 export default function Home() {
     const [webGL, setWebGL]: any = useState(null)
-    const [paused, setPaused]: any = useState(false)
+    const [paused, setPaused] = useState(false)
     const pausedRef = useRef(paused)
     const sceneRef = useRef<ThreeSceneHandle>(null)
 
