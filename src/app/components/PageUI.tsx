@@ -7,7 +7,7 @@ import { ThreeSceneHandle } from "./ThreeScene";
 interface PageUIProps {
     paused: boolean,
     setPaused: Dispatch<SetStateAction<boolean>>,
-    sceneRef: React.RefObject<ThreeSceneHandle>
+    sceneRef: React.RefObject<ThreeSceneHandle | null>
 }
 
 export function PageUI(props: PageUIProps) {
