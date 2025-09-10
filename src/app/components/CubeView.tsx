@@ -70,12 +70,8 @@ export const CubeView = memo(forwardRef<CubeViewHandle, CubeViewProps>((props: a
             // update cubeData with the corresponding rotation once the rotation animation finishes
             cubeData.rotateBySide(currentRotationRef.current)
 
-            // // push the most recent rotation back into the queue, for testing rotations endlessly
-            // queue.push(currentRotationRef.current)
-
             // get the next thing in the list
             currentRotationRef.current = queue.dequeue()
-            console.log("currentRotation:", currentRotationRef)
 
             rotatingRef.current = true
         } else if (rotatingRef.current) {
@@ -88,13 +84,9 @@ export const CubeView = memo(forwardRef<CubeViewHandle, CubeViewProps>((props: a
     }
 
     function scramble() {
-        queue.print()
-        console.log("get scrambled bozo")
         const scramble = queue.generateScramble()
-        console.log("Final Scramble:", scramble)
 
         queue.push(...queue.strsToRotations(...scramble)!)
-        queue.print()
     }
 
     const speed = 4

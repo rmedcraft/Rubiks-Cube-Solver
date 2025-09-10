@@ -17,14 +17,11 @@ export function PageUI(props: PageUIProps) {
 
     useEffect(() => {
         if (!sceneRef.current) return
-        console.log("getCubeRef")
         cubeRef = sceneRef.current.getCubeRef()
-        console.log(cubeRef.current)
     }, [])
 
     function scramble() {
         if (!cubeRef.current) return
-        console.log("scrambling")
         cubeRef.current.scramble()
     }
 
@@ -38,7 +35,6 @@ export function PageUI(props: PageUIProps) {
             <div className="absolute bottom-2 w-screen flex flex-row justify-center gap-3">
                 <div className=" pointer-events-auto">
                     <RippleButton variant="default" onClick={scramble} >
-                        {/* onClick={sceneRef.current.scramble()} */}
                         Scramble
                     </RippleButton>
                 </div>

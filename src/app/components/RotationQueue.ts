@@ -102,21 +102,13 @@ export class RotationQueue {
 
         const scrambleList: string[] = []
 
-        console.log("Starting Values:")
-        console.log("allRotations:", allRotations)
-        console.log("currentRotations:", currentRotations)
-        console.log("scrambleList:", scrambleList)
-
         for (let i = 0; i < depth; i++) {
             // generate random rotation from currentRotations
             const currentRot = currentRotations[Math.floor(Math.random() * currentRotations.length)]
-            console.log("Current Rotation:", currentRot)
             scrambleList.push(currentRot)
-            console.log("scrambleList:", scrambleList)
 
             // removes anything on the same or opposite side from currentRotations
             currentRotations = allRotations.filter((rotation) => rotation[0] !== currentRot[0] && rotation[0] !== rotToOpposite.get(currentRot[0]))
-            console.log("currentRotations:", currentRotations)
         }
 
         return scrambleList
