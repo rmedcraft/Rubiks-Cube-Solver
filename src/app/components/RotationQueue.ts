@@ -70,7 +70,7 @@ export class RotationQueue {
     }
 
     strToRotation(str: string): Rotation | undefined {
-        return this.rotationMap.get(str.trim())
+        return structuredClone(this.rotationMap.get(str.trim()))
     }
 
     strsToRotations(...strs: string[]): Rotation[] | undefined {
@@ -82,5 +82,43 @@ export class RotationQueue {
             }
         })
         return rotationList
+    }
+
+    /**
+     * 
+     * @param depth the number of random rotations to make, defaults to 20. If the depth is a decimal, it rounds up to the nearest integer
+     * @returns a randomized array of rotations that scramble the cube
+     */
+    generateScramble(depth: number = 20): string[] {
+        // maps each rotation to its opposite
+        const rotToOpposite = new Map<string, string>([["F", "B"], ["B", 'F'], ["U", "D"], ["D", "U"], ["L", "R"], ["R", "L"]])
+
+
+        // stores all available rotations on the cube
+        const allRotations: string[] = Array.from(this.rotationMap.keys())
+
+        // stores the current rotations that can be chosen
+        let currentRotations: string[] = allRotations
+
+        const scrambleList: string[] = []
+
+        console.log("Starting Values:")
+        console.log("allRotations:", allRotations)
+        console.log("currentRotations:", currentRotations)
+        console.log("scrambleList:", scrambleList)
+
+        for (let i = 0; i < depth; i++) {
+            // generate random rotation from currentRotations
+            const currentRot = currentRotations[Math.floor(Math.random() * currentRotations.length)]
+            console.log("Current Rotation:", currentRot)
+            scrambleList.push(currentRot)
+            console.log("scrambleList:", scrambleList)
+
+            // removes anything on the same or opposite side from currentRotations
+            currentRotations = allRotations.filter((rotation) => rotation[0] !== currentRot[0] && rotation[0] !== rotToOpposite.get(currentRot[0]))
+            console.log("currentRotations:", currentRotations)
+        }
+
+        return scrambleList
     }
 }
