@@ -1,15 +1,21 @@
 import * as THREE from "three";
-import React, { useRef, useEffect, useState } from "react";
-// import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import React, { useRef, forwardRef, useImperativeHandle } from "react";
 import { OrbitControls } from '@react-three/drei'
 import { CubeView, CubeViewHandle } from "./CubeView";
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import { addCleanupEventListener } from "../utils/eventListener";
 
 // export const scene = new THREE.Scene();
+export interface ThreeSceneHandle {
+    getCubeRef: () => React.RefObject<CubeViewHandle | null>
+}
 
-export default function ThreeScene() {
-    const pausedRef = useRef<boolean>(false)
+export interface ThreeSceneProps {
+    pausedRef: React.RefObject<boolean>
+}
+
+export const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props: ThreeSceneProps, ref) => {
+    const { pausedRef } = props
 
     const cubeRef = useRef<CubeViewHandle>(null)
     function positionCamera(camera: THREE.Camera) {
@@ -29,12 +35,17 @@ export default function ThreeScene() {
         }
     })
 
+    useImperativeHandle(ref, () => ({
+        getCubeRef: () => cubeRef
+    }))
+
     const dim = 3
     return (
         <Canvas gl={{ antialias: true, toneMapping: THREE.NoToneMapping }} onCreated={({ camera }) => positionCamera(camera)} style={{ width: "100vw", height: "100vh" }}>
+            <color attach="background" args={["black"]} />
             <OrbitControls enableDamping={false} target={[0, 0, 0]} />
 
             <CubeView ref={cubeRef} paused={pausedRef} dim={dim} />
         </Canvas>
     )
-};
+});
