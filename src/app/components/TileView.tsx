@@ -16,6 +16,7 @@ export enum Color {
 
 export interface TileViewHandle {
     rotateBySide: (side: Side) => void,
+    positionBySide: (side: Side, r: number, c: number, dim: number) => void
     setColor: (color: Color) => void,
     getColor: () => Color,
     getTile: () => THREE.Group<THREE.Object3DEventMap>
@@ -49,6 +50,56 @@ export const TileView = forwardRef<TileViewHandle, TileViewProps>((props, ref) =
             }
             if (side === Side.bottom) {
                 tileRef.current.rotateX(Math.PI / 2);
+            }
+        },
+        positionBySide: (side, r, c, dim) => {
+            if (!tileRef.current) return
+            const tileObj = tileRef.current
+
+            // position tile correctly
+            if (side === Side.front) {
+                tileObj.position.y = c;
+                tileObj.position.x = r;
+            }
+            if (side === Side.back) {
+                tileObj.position.y = c;
+                tileObj.position.x = r;
+                tileObj.position.z = -dim;
+            }
+
+            if (side === Side.left) {
+                tileObj.position.z = r;
+                tileObj.position.y = c;
+                // line up with the borders of the front and back
+                tileObj.position.z += 0.5 - dim;
+
+                tileObj.position.x -= 0.5;
+
+            }
+            if (side === Side.right) {
+                tileObj.position.z = r;
+                tileObj.position.y = c;
+                // line up with the borders of the front and back
+                tileObj.position.z += 0.5 - dim;
+
+                tileObj.position.x += dim - 0.5;
+            }
+
+            if (side === Side.top) {
+                tileObj.position.y += dim - 0.5;
+                tileObj.position.x = r;
+                tileObj.position.z = c; // have the physical rotations match what you expect to happen in the matrix
+
+                // line up with the borders of the front and back
+                tileObj.position.z += 0.5 - dim;
+            }
+            if (side === Side.bottom) {
+                tileObj.position.y -= 0.5;
+                tileObj.position.x = r;
+                tileObj.position.z = c;
+
+                // line up with the borders of the front and back
+                tileObj.position.z += 0.5 - dim;
             }
         },
         setColor,
