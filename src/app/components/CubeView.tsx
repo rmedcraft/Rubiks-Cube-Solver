@@ -174,12 +174,6 @@ export const CubeView = memo(forwardRef<CubeViewHandle, CubeViewProps>((props: a
         cubeRef.current.children.forEach((child) => {
             child.position.sub(center)
         })
-
-
-        // temporary adding to the queue for testing
-        // const str = "F U F' U'"
-        // const str = "F L B U R D F' L' B' U' R' D' F2 L2 B2 U2 R2 D2"
-        // queue.pushStr(str)
     }, [])
 
     return (
@@ -198,6 +192,11 @@ export const CubeView = memo(forwardRef<CubeViewHandle, CubeViewProps>((props: a
         </group>
     )
 
+    /**
+     * Determines the side to rotate based on the value of currentRotation
+     * @param delta the change in time since the last clock tick
+     * @returns 
+     */
     function rotateBySide(delta: number) {
         if (!currentRotationRef.current) return
         if (currentRotationRef.current.side === Side.front) {
@@ -220,8 +219,10 @@ export const CubeView = memo(forwardRef<CubeViewHandle, CubeViewProps>((props: a
         }
     }
 
-
-
+    /**
+     * Groups a side of the cube based on the side being rotated
+     * @returns a THREE.Group containing all the tiles on a side of the cube
+     */
     function groupSide() {
         const side = currentRotationRef.current!.side
         const group = new THREE.Group()
@@ -270,7 +271,6 @@ export const CubeView = memo(forwardRef<CubeViewHandle, CubeViewProps>((props: a
             element.matrix.decompose(element.position, element.quaternion, element.scale)
             element.matrixAutoUpdate = true
 
-            // group.remove(element)
             cubeRef.current!.add(element)
         }
     }
