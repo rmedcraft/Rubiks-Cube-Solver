@@ -38,11 +38,11 @@ export function PageUI(props: PageUIProps) {
                         Scramble
                     </RippleButton>
                 </div>
-                <div className=" pointer-events-auto">
+                {/* <div className=" pointer-events-auto">
                     <RippleButton variant="default">
                         Solve
                     </RippleButton>
-                </div>
+                </div> */}
             </div>
         </div >
     )
