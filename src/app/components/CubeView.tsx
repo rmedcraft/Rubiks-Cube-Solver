@@ -111,60 +111,13 @@ export const CubeView = memo(forwardRef<CubeViewHandle, CubeViewProps>((props: a
 
                     const tileObj = tile.getTile()
 
-                    // rotate tile correctly
+                    // rotate & position tile correctly
                     const side = i as Side;
                     tile.rotateBySide(side);
-
-                    // position tile correctly
-                    if (side === Side.front) {
-                        tileObj.position.y = c;
-                        tileObj.position.x = r;
-                    }
-                    if (side === Side.back) {
-                        tileObj.position.y = c;
-                        tileObj.position.x = r;
-                        tileObj.position.z = -dim;
-                    }
-
-                    if (side === Side.left) {
-                        tileObj.position.z = r;
-                        tileObj.position.y = c;
-                        // line up with the borders of the front and back
-                        tileObj.position.z += 0.5 - dim;
-
-                        tileObj.position.x -= 0.5;
-
-                    }
-                    if (side === Side.right) {
-                        tileObj.position.z = r;
-                        tileObj.position.y = c;
-                        // line up with the borders of the front and back
-                        tileObj.position.z += 0.5 - dim;
-
-                        tileObj.position.x += dim - 0.5;
-                    }
-
-                    if (side === Side.top) {
-                        tileObj.position.y += dim - 0.5;
-                        tileObj.position.x = r;
-                        tileObj.position.z = c; // have the physical rotations match what you expect to happen in the matrix
-
-                        // line up with the borders of the front and back
-                        tileObj.position.z += 0.5 - dim;
-                    }
-                    if (side === Side.bottom) {
-                        tileObj.position.y -= 0.5;
-                        tileObj.position.x = r;
-                        tileObj.position.z = c;
-
-                        // line up with the borders of the front and back
-                        tileObj.position.z += 0.5 - dim;
-                    }
+                    tile.positionBySide(side, r, c, dim)
 
                     // add to cube group
                     cubeRef.current!.add(tileObj);
-
-                    // add to cubeData
                 }
             }
         }
